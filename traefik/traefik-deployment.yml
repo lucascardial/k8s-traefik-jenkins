@@ -21,12 +21,28 @@ spec:
       containers:
         - image: traefik
           name: traefik-ingress-lb
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: "/ssl"
+              name: "ssl"
+            - mountPath: "/config"
+              name: "config"
           ports:
             - name: http
               containerPort: 80
+            - name: https
+              containerPort: 443
             - name: admin
               containerPort: 8080
           args:
+            - --configfile=/config/traefik.toml
             - --api
             - --kubernetes
             - --logLevel=INFO
+      volumes:
+        - name: ssl
+          secret:
+            secretName: traefik-cert
+        - name: config
+          configMap:
+            name: traefik-conf
